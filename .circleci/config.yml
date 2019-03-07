@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  validate-jsonschema:
+    docker:
+      - image: circleci/node:10.14.2
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-v2-{{ .Branch }}
+            - node-v2-
+
+      - run:
+          command: |
+            npm install ajv-cli@3.0.0
+            node_modules/.bin/ajv validate -s schema.json -d valid_data.json --errors=text
+
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: node-v2-{{ .Branch }}
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - validate-jsonschema
